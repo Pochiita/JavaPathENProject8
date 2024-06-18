@@ -1,5 +1,6 @@
 package com.openclassrooms.tourguide.service;
 
+import com.openclassrooms.tourguide.dto.AttractionDataDTO;
 import com.openclassrooms.tourguide.helper.InternalTestHelper;
 import com.openclassrooms.tourguide.tracker.Tracker;
 import com.openclassrooms.tourguide.user.User;
@@ -7,14 +8,7 @@ import com.openclassrooms.tourguide.user.UserReward;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -96,15 +90,30 @@ public class TourGuideService {
 	}
 
 	public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
-		List<Attraction> nearbyAttractions = new ArrayList<>();
-		for (Attraction attraction : gpsUtil.getAttractions()) {
-			if (rewardsService.isWithinAttractionProximity(attraction, visitedLocation.location)) {
-				nearbyAttractions.add(attraction);
-			}
-		}
-
-		return nearbyAttractions;
+		List<Attraction> attractions = gpsUtil.getAttractions();
+		return attractions.stream()
+				.sorted(Comparator.comparingDouble(a -> rewardsService.getDistance(a, visitedLocation.location)))
+				.limit(5)
+				.collect(Collectors.toList());
 	}
+
+	public List<AttractionDataDTO> getFiveClosestAttractions(User user) {
+		Location userLocation = getUserLocation(user).location;
+
+		return gpsUtil.getAttractions().stream()
+				.map(attraction -> {
+					Location attractionLocation = new Location(attraction.latitude, attraction.longitude);
+					double distance = rewardsService.getDistance(attractionLocation, userLocation);
+					int rewardPoint = rewardsService.getRewardPoints(attraction, user);
+					return new AttractionDataDTO(attraction.attractionName, attractionLocation,
+							userLocation, distance, rewardPoint);
+				})
+				.sorted(Comparator.comparingDouble(AttractionDataDTO::getDistance))
+				.limit(5)
+				.collect(Collectors.toList());
+	}
+
+
 
 	private void addShutDownHook() {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
