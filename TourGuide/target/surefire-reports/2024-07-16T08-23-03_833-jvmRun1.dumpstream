@@ -1,0 +1,6 @@
+# Created at 2024-07-16T08:26:53.309
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '[229.071s][warning][os,thread] Failed to start thread "Unknown thread" - _beginthreadex failed (EACCES) for attributes: stacksize: default, flags: CREATE_SUSPENDED STACK_SIZE_PARAM_IS.'.
+
+# Created at 2024-07-16T08:26:53.964
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '[229.071s][warning][os,thread] Failed to start the native thread for java.lang.Thread "pool-20691-thread-4"'.
+

@@ -1,8 +1,7 @@
 package com.openclassrooms.tourguide.service;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Stream;
+import java.util.concurrent.*;
 
 import org.springframework.stereotype.Service;
 
@@ -25,6 +24,11 @@ public class RewardsService {
 	private final GpsUtil gpsUtil;
 	private final RewardCentral rewardsCentral;
 
+	private int index = 0;
+
+	ExecutorService executorService = Executors.newFixedThreadPool(4000);
+
+
 	public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
 		this.gpsUtil = gpsUtil;
 		this.rewardsCentral = rewardCentral;
@@ -38,22 +42,24 @@ public class RewardsService {
 		proximityBuffer = defaultProximityBuffer;
 	}
 
-	public void calculateRewards(User user) {
-		List<VisitedLocation> userLocations = new CopyOnWriteArrayList<>(user.getVisitedLocations());
-		List<Attraction> attractions = new CopyOnWriteArrayList<>(gpsUtil.getAttractions());
 
-		for(VisitedLocation visitedLocation : userLocations) {
-            for (Attraction attraction : attractions) {
-				if(user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
-					if(nearAttraction(visitedLocation, attraction)) {
-                        user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
-                    }
+
+	public Future<?> calculateRewards(User user) {
+		return executorService.submit(()->{
+			List<VisitedLocation> userLocations =new CopyOnWriteArrayList<>(user.getVisitedLocations());
+			List<Attraction> attractions = new CopyOnWriteArrayList<>(gpsUtil.getAttractions());
+
+			for (VisitedLocation visitedLocation : userLocations){
+				for(Attraction attraction : attractions) {
+					if(user.getUserRewards().stream().noneMatch(r -> r.attraction.attractionName.equals(attraction.attractionName))) {
+						if(nearAttraction(visitedLocation, attraction)) {
+							user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
+						}
+					}
 				}
 			}
-		}
+		});
 	}
-
-
 
 
 
