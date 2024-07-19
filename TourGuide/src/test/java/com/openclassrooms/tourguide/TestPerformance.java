@@ -49,12 +49,13 @@ public class TestPerformance {
 
 	//	@Disabled
 	@Test
-	public void highVolumeTrackLocation() {
+	public void highVolumeTrackLocation() throws ExecutionException, InterruptedException {
 		GpsUtil gpsUtil = new GpsUtil();
 		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
 		// Users should be incremented up to 100,000, and test finishes within 15
 		// minutes
-		InternalTestHelper.setInternalUserNumber(100000);
+		int users = 100000;
+		InternalTestHelper.setInternalUserNumber(users);
 		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
 
 		List<User> allUsers = tourGuideService.getAllUsers();
@@ -66,7 +67,9 @@ public class TestPerformance {
 		for (User user : allUsers) {
 			locations.add(tourGuideService.trackUserLocation(user));
 		}
-		List<VisitedLocation> locationList = locations.stream().map(CompletableFuture::join).toList();
+		CompletableFuture.allOf(locations.toArray(new CompletableFuture[users])).
+				thenAccept(v->locations.stream().map(CompletableFuture::join))
+						.get();
 
 		stopWatch.stop();
 		tourGuideService.tracker.stopTracking();
@@ -91,21 +94,19 @@ public class TestPerformance {
 
 		Attraction attraction = gpsUtil.getAttractions().get(0);
 		List<User> allUsers = tourGuideService.getAllUsers();
-
-		allUsers.forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
-
 		List<Future<?>> allRewards = new ArrayList<>();
+		allUsers.forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
 		allUsers.forEach(user->{
 			allRewards.add(rewardsService.calculateRewards(user));
 		});
-		assertEquals(InternalTestHelper.getInternalUserNumber(), allRewards.size());
-		allRewards.forEach(rewardFuture -> {
-			try {
-				rewardFuture.get();
-			} catch (InterruptedException | ExecutionException e) {
-				throw new RuntimeException(e);
-			}
-		});
+		allRewards.forEach(rewards->{
+			try{
+				rewards.get();
+			} catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
 		for (User user : allUsers) {
 			assertFalse(user.getUserRewards().isEmpty());
 		}

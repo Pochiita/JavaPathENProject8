@@ -48,7 +48,6 @@ public class RewardsService {
 		return executorService.submit(()->{
 			List<VisitedLocation> userLocations =new CopyOnWriteArrayList<>(user.getVisitedLocations());
 			List<Attraction> attractions = new CopyOnWriteArrayList<>(gpsUtil.getAttractions());
-
 			for (VisitedLocation visitedLocation : userLocations){
 				for(Attraction attraction : attractions) {
 					if(user.getUserRewards().stream().noneMatch(r -> r.attraction.attractionName.equals(attraction.attractionName))) {

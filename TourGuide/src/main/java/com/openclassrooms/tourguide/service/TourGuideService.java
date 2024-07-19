@@ -9,10 +9,7 @@ import com.openclassrooms.tourguide.user.UserReward;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -38,6 +35,8 @@ public class TourGuideService {
 	boolean testMode = true;
 
 	private int index = 0;
+
+	private final ExecutorService executorService = Executors.newFixedThreadPool(1000);
 
 
 	public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService) {
@@ -90,9 +89,18 @@ public class TourGuideService {
 	}
 
 	public CompletableFuture<VisitedLocation> trackUserLocation(User user) {
-		CompletableFuture<VisitedLocation> visitedLocation = CompletableFuture.supplyAsync(()->gpsUtil.getUserLocation(user.getUserId()));
-		visitedLocation.thenAccept(user::addToVisitedLocations)
-				.thenRun(()->rewardsService.calculateRewards(user));
+		CompletableFuture<VisitedLocation> visitedLocation = CompletableFuture.supplyAsync(()->gpsUtil.getUserLocation(user.getUserId()),executorService);
+		CompletableFuture updateUserVisitedLocation = new CompletableFuture<>();
+		updateUserVisitedLocation = visitedLocation.thenAccept(result->{
+			try{
+				user.addToVisitedLocations(visitedLocation.get());
+				rewardsService.calculateRewards(user);
+			} catch (ExecutionException e) {
+                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
 		return visitedLocation;
 	}
 
