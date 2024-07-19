@@ -94,7 +94,7 @@ public class TourGuideService {
 		updateUserVisitedLocation = visitedLocation.thenAccept(result->{
 			try{
 				user.addToVisitedLocations(visitedLocation.get());
-				rewardsService.calculateRewards(user);
+				rewardsService.calculateRewards(user).get();
 			} catch (ExecutionException e) {
                 throw new RuntimeException(e);
             } catch (InterruptedException e) {
