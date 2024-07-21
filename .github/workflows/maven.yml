@@ -38,7 +38,7 @@ jobs:
       run: mvn install:install-file -Dfile=TourGuide/libs/TripPricer.jar -DgroupId=tripPricer -DartifactId=tripPricer -Dversion=1 -Dpackaging=jar
 
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: mvn -B package --file ./TourGuide/pom.xml
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
