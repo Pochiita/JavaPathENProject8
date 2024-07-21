@@ -24,8 +24,6 @@ public class RewardsService {
 	private final GpsUtil gpsUtil;
 	private final RewardCentral rewardsCentral;
 
-	private int index = 0;
-
 	ExecutorService executorService = Executors.newFixedThreadPool(4000);
 
 

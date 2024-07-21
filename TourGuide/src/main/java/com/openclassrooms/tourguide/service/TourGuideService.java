@@ -34,8 +34,6 @@ public class TourGuideService {
 	public final Tracker tracker;
 	boolean testMode = true;
 
-	private int index = 0;
-
 	private final ExecutorService executorService = Executors.newFixedThreadPool(1000);
 
 
