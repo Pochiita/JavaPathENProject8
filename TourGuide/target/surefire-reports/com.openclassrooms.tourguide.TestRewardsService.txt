@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 Test set: com.openclassrooms.tourguide.TestRewardsService
 -------------------------------------------------------------------------------
-Tests run: 3, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 24.749 s <<< FAILURE! - in com.openclassrooms.tourguide.TestRewardsService
-com.openclassrooms.tourguide.TestRewardsService.userGetRewards  Time elapsed: 5.057 s  <<< FAILURE!
+Tests run: 3, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 24.121 s <<< FAILURE! - in com.openclassrooms.tourguide.TestRewardsService
+com.openclassrooms.tourguide.TestRewardsService.userGetRewards  Time elapsed: 5.024 s  <<< FAILURE!
 org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
 	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
 	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
