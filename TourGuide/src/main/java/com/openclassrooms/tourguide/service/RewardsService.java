@@ -41,7 +41,21 @@ public class RewardsService {
 	}
 
 
-
+	/**
+	 * Calculates rewards for the specified user based on the locations they have visited and the attractions available.
+	 * This method is executed asynchronously using an {@link ExecutorService}.
+	 *
+	 * The method retrieves the user's visited locations and the list of available attractions.
+	 * It then iterates over each visited location to check if the user has already received a reward
+	 * for each attraction. If the user has not received a reward for an attraction and
+	 * the visited location is near the attraction, a new user reward is added.
+	 *
+	 * This method returns a {@link Future} that can be used to track the completion of the reward calculation.
+	 *
+	 * @param user the user for whom the rewards are to be calculated. This must not be {@code null}.
+	 * @return a {@link Future} representing the pending result of the asynchronous reward calculation.
+	 * @throws NullPointerException if the specified user is {@code null}.
+	 */
 	public Future<?> calculateRewards(User user) {
 		return executorService.submit(()->{
 			List<VisitedLocation> userLocations =new CopyOnWriteArrayList<>(user.getVisitedLocations());

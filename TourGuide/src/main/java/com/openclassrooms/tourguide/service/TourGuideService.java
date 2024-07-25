@@ -86,6 +86,23 @@ public class TourGuideService {
 		return providers;
 	}
 
+	/**
+	 * Tracks the location of a given user asynchronously and updates their visited locations.
+	 *
+	 * This method retrieves the user's current location using the GPS utility and updates
+	 * the user's list of visited locations accordingly. It also calculates rewards for the
+	 * user based on their updated visited locations. The operation is performed in a separate
+	 * thread using the provided executor service.
+	 *
+	 * @param user The user whose location is to be tracked. Must not be null.
+	 * @return A CompletableFuture that will be completed with the user's visited location
+	 *         once the location has been successfully retrieved and the user's visited
+	 *         locations have been updated. The future may complete exceptionally if an
+	 *         error occurs during the process.
+	 * @throws RuntimeException If an error occurs during user location retrieval, updating
+	 *         visited locations, or reward calculation. This includes handling of
+	 *         {@link ExecutionException} and {@link InterruptedException}.
+	 */
 	public CompletableFuture<VisitedLocation> trackUserLocation(User user) {
 		CompletableFuture<VisitedLocation> visitedLocation = CompletableFuture.supplyAsync(()->gpsUtil.getUserLocation(user.getUserId()),executorService);
 		CompletableFuture updateUserVisitedLocation = new CompletableFuture<>();
@@ -110,6 +127,22 @@ public class TourGuideService {
 				.collect(Collectors.toList());
 	}
 
+	/**
+	 * Retrieves the five closest attractions to a specified user based on the user's current location.
+	 * For each attraction, it calculates the distance from the user's location and also fetches the number
+	 * of reward points the user would earn for visiting that attraction.
+	 *
+	 * @param user the user for whom the closest attractions are to be retrieved. This user object should
+	 *             contain valid location data to ascertain the user's current position.
+	 * @return a list of {@link AttractionDataDTO} objects representing the five closest attractions to the user.
+	 *         Each object includes the attraction's name, its location, the user's location, the distance
+	 *         from the user to the attraction, and the reward points that the user would earn.
+	 * @throws IllegalArgumentException if the user parameter is null or if the user's location is unavailable.
+	 * @see Location
+	 * @see AttractionDataDTO
+	 * @see gpsUtil
+	 * @see RewardsService
+	 */
 	public List<AttractionDataDTO> getFiveClosestAttractions(User user) {
 		Location userLocation = getUserLocation(user).location;
 
